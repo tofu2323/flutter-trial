@@ -28,11 +28,7 @@ class MyApp extends StatelessWidget {
               ],
             ),
           ),
-          Icon(
-            Icons.star,
-            color: Colors.red[500],
-          ),
-          Text('41')
+          FavoriteWidget()
         ],
       ),
     );
@@ -104,96 +100,46 @@ Lake Oeschinen lies at the foot of the Blüemlisalp in the Bernese Alps. Situate
   }
 }
 
-class RandomWords extends StatefulWidget {
+class FavoriteWidget extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => RandomWordsState();
+  State<StatefulWidget> createState() => _FavoriteWidgetState();
 }
 
-class RandomWordsState extends State<RandomWords> {
-  final List<WordPair> _suggestions = <WordPair>[];
-  final Set<WordPair> _saved = new Set<WordPair>();
-  final TextStyle _biggerFont = const TextStyle(fontSize: 18.0);
+class _FavoriteWidgetState extends State<FavoriteWidget> {
+  bool _isFavorited = true;
+  int _favoriteCount = 41;
+
+  void _toggleFavorite() {
+    setState(() {
+      if (_isFavorited) {
+        _favoriteCount -= 1;
+        _isFavorited = false;
+      } else {
+        _favoriteCount += 1;
+        _isFavorited = true;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Startup Name Generator'), actions: <Widget>[
-        new IconButton(icon: Icon(Icons.list), onPressed: _pushSaved)
-      ]),
-      body: _buildSuggestions(),
-    );
-  }
-
-  void _pushSaved() {
-    Navigator.of(context).push(
-      new MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          final Iterable<ListTile> tiles = _saved.map(
-            (WordPair pair) {
-              return new ListTile(
-                title: new Text(
-                  pair.asPascalCase,
-                  style: _biggerFont,
-                ),
-              );
-            },
-          );
-          final List<Widget> divided = ListTile
-              .divideTiles(
-                context: context,
-                tiles: tiles,
-              )
-              .toList();
-          return new Scaffold(
-            appBar: new AppBar(
-              title: const Text("Saved Suggestions"),
-            ),
-            body: new ListView(children: divided),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildSuggestions() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemBuilder: (context, i) {
-        if (i.isOdd) return Divider();
-
-        final index = i ~/ 2;
-
-        if (index >= _suggestions.length) {
-          _suggestions.addAll(generateWordPairs().take(10));
-        }
-        return _buildRow(_suggestions[index]);
-      },
-    );
-  }
-
-  Widget _buildRow(WordPair pair) {
-    final bool alreadySaved = _saved.contains(pair);
-    return ListTile(
-      title: Text(
-        pair.asPascalCase,
-        style: _biggerFont,
-      ),
-      trailing: new Icon(
-        alreadySaved ? Icons.favorite : Icons.favorite_border,
-        color: alreadySaved ? Colors.red : null,
-      ),
-      onTap: () {
-        setState(() {
-          // Tip: In Flutter's reactive style framework,
-          // calling setState() triggers a call to the build() method for the State object,
-          // resulting in an update to the UI.
-          if (alreadySaved) {
-            _saved.remove(pair);
-            return;
-          }
-          _saved.add(pair);
-        });
-      },
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Container(
+          padding: EdgeInsets.all(0.0),
+          child: IconButton(
+              icon: (_isFavorited ? Icon(Icons.star) : Icon(Icons.star_border)),
+              color: Colors.red[500],
+              onPressed: _toggleFavorite),
+        ),
+        SizedBox(
+          width: 18.0,
+          child: Container(
+            child: Text('$_favoriteCount'),
+          ),
+        )
+      ],
     );
   }
 }
